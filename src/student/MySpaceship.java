@@ -1,15 +1,24 @@
 package student;
 
+/** */
+
 import controllers.Spaceship;
 import models.Edge;
 import models.Node;
 import models.NodeStatus;
 
 import controllers.SearchPhase;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import controllers.RescuePhase;
 
 /** An instance implements the methods needed to complete the mission. */
 public class MySpaceship implements Spaceship {
+	ArrayList<Integer> visited = new ArrayList<Integer>();
 
 	/** The spaceship is on the location given by parameter state.
 	 * Move the spaceship to Planet X and then return (with the spaceship is on
@@ -38,8 +47,28 @@ public class MySpaceship implements Spaceship {
 	@Override
 	public void search(SearchPhase state) {
 		// TODO: Find the missing spaceship
+		ourSearch(state);
 	}
 
+	public void ourSearch(SearchPhase s) {
+		int current = s.currentID();
+		visited.add(current);
+		
+		List<NodeStatus> neighbors = Arrays.asList(s.neighbors());
+		Collections.sort(neighbors);
+		Collections.reverse(neighbors);
+		
+		for (NodeStatus ns : neighbors) {
+			if (!visited.contains(ns)) {
+				s.moveTo(ns.id());
+				if (s.onPlanetX()) return;
+				
+				ourSearch(s);
+				s.moveTo(current);
+			}
+		}
+	}
+	
 	/** The spaceship is on the location given by state. Get back to Earth
 	 * without running out of fuel and return while on Earth. Your ship can
 	 * determine how much fuel it has left via method fuelRemaining().

@@ -16,8 +16,32 @@ public class Paths {
      * Note: The empty list is NOT "null"; it is a list with 0 elements. */
     public static List<Node> minPath(Node start, Node end) {
         /* TODO Read Piazza note Assignment A7 for ALL details. */
-        Heap<Node> F= new Heap<Node>(true); // As in lecture slides
-
+        Heap<Node> F= new Heap<Node>(false); // As in lecture slides
+        
+        HashMap<Node, SF> data = new HashMap<Node, SF>();
+        F.add(start, 0);
+        data.put(start, new SF(null, 0));
+        
+        while (F.size() != 0) {
+	        	if (F.peek().equals(end)) 
+	        		return makePath(data, end);	
+	        	
+	        	Node f = F.poll();
+	    		
+        		for (Edge e : f.getExits()) {
+        			Node w = e.getOther(f);
+        			int distance = e.length + data.get(f).distance;
+        			
+        			if (!data.containsKey(w)) {
+        				data.put(w, new SF(f, distance));
+        				F.add(w, distance);
+        				
+        			} else if (distance < data.get(w).distance) {
+        				data.put(w, new SF(f, distance));
+        				F.updatePriority(w, distance);
+        			}
+        		}
+        } 
         // no path from start to end
         return new LinkedList<Node>();
     }
