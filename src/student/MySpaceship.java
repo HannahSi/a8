@@ -1,6 +1,9 @@
 package student;
 
-/** */
+/** Time spent: 
+ * 4/28: 1 hr
+ * 4/28-4/29 separately 1 hr
+ * 4/29 1 hr */
 
 import controllers.Spaceship;
 import models.Edge;
@@ -47,7 +50,23 @@ public class MySpaceship implements Spaceship {
 	@Override
 	public void search(SearchPhase state) {
 		// TODO: Find the missing spaceship
-		ourSearch(state);
+		int current = state.currentID();
+		visited.add(current);
+		
+		List<NodeStatus> neighbors = Arrays.asList(state.neighbors());
+		Collections.sort(neighbors);
+		
+		for (int i = neighbors.size()-1; i >= 0; i--) {
+			if (!visited.contains(neighbors.get(i).id())) {
+				state.moveTo(neighbors.get(i).id());
+				if (state.onPlanetX()) return;
+				
+				search(state);
+				
+				if (state.onPlanetX()) return;
+				state.moveTo(current);
+			}
+		}
 	}
 
 	public void ourSearch(SearchPhase s) {
@@ -56,14 +75,15 @@ public class MySpaceship implements Spaceship {
 		
 		List<NodeStatus> neighbors = Arrays.asList(s.neighbors());
 		Collections.sort(neighbors);
-		Collections.reverse(neighbors);
 		
-		for (NodeStatus ns : neighbors) {
-			if (!visited.contains(ns)) {
-				s.moveTo(ns.id());
+		for (int i = neighbors.size()-1; i >= 0; i--) {
+			if (!visited.contains(neighbors.get(i).id())) {
+				s.moveTo(neighbors.get(i).id());
 				if (s.onPlanetX()) return;
 				
 				ourSearch(s);
+				
+				if (s.onPlanetX()) return;
 				s.moveTo(current);
 			}
 		}
