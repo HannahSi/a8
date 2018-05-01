@@ -4,7 +4,7 @@ package student;
  * 4/28: 1.5 hrs
  * separately 1 hr
  * 4/29 1 hr 
- * 4/20 1.75 hrs */
+ * 4/30 1.75 hrs */
 
 import controllers.Spaceship;
 
@@ -58,22 +58,29 @@ public class MySpaceship implements Spaceship {
 	@Override
 	public void search(SearchPhase state) {
 		// TODO: Find the missing spaceship
+		
 		int current = state.currentID();
 		visited.add(current);
+		
+		if (state.onPlanetX()) return;
 		
 		List<NodeStatus> neighbors = Arrays.asList(state.neighbors());
 		Collections.sort(neighbors);
 		
 		for (int i = neighbors.size()-1; i >= 0; i--) {
+			
+			if (state.onPlanetX()) return;
+			
 			if (!visited.contains(neighbors.get(i).id())) {
+				
 				state.moveTo(neighbors.get(i).id());
-				if (state.onPlanetX()) return;
 				
 				search(state);
 				
-				if (state.onPlanetX()) return;
-				state.moveTo(current);
+				if (!state.onPlanetX())
+					state.moveTo(current);
 			}
+			
 		}
 	}
 	
@@ -123,6 +130,8 @@ public class MySpaceship implements Spaceship {
 		} while (i > 0 && currentToNeighbor + neighborToEarth > state.fuelRemaining());
 		
 		state.moveTo(neighbors.get(i));
+		
+		
 
 	}
 	
