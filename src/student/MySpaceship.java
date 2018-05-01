@@ -1,27 +1,35 @@
 package student;
 
 /** Time spent: 
- * 4/28: 1 hr
- * 4/28-4/29 separately 1 hr
- * 4/29 1 hr */
+ * 4/28: 1.5 hrs
+ * separately 1 hr
+ * 4/29 1 hr 
+ * 4/20 1.75 hrs */
 
 import controllers.Spaceship;
+
 import models.Edge;
 import models.Node;
 import models.NodeStatus;
-
+import student.Paths.SF;
 import controllers.SearchPhase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+
+import org.omg.CORBA.Current;
 
 import controllers.RescuePhase;
 
 /** An instance implements the methods needed to complete the mission. */
 public class MySpaceship implements Spaceship {
+	
 	ArrayList<Integer> visited = new ArrayList<Integer>();
+	HashMap<Node, SF> minPaths = new HashMap<Node, SF>();
 
 	/** The spaceship is on the location given by parameter state.
 	 * Move the spaceship to Planet X and then return (with the spaceship is on
@@ -68,26 +76,6 @@ public class MySpaceship implements Spaceship {
 			}
 		}
 	}
-
-	public void ourSearch(SearchPhase s) {
-		int current = s.currentID();
-		visited.add(current);
-		
-		List<NodeStatus> neighbors = Arrays.asList(s.neighbors());
-		Collections.sort(neighbors);
-		
-		for (int i = neighbors.size()-1; i >= 0; i--) {
-			if (!visited.contains(neighbors.get(i).id())) {
-				s.moveTo(neighbors.get(i).id());
-				if (s.onPlanetX()) return;
-				
-				ourSearch(s);
-				
-				if (s.onPlanetX()) return;
-				s.moveTo(current);
-			}
-		}
-	}
 	
 	/** The spaceship is on the location given by state. Get back to Earth
 	 * without running out of fuel and return while on Earth. Your ship can
@@ -108,5 +96,56 @@ public class MySpaceship implements Spaceship {
 	@Override
 	public void rescue(RescuePhase state) {
 		// TODO: Complete the rescue mission and collect gems
+		
+		minPaths = Paths.allMinPaths(state.earth());
+		
 	}
+	
+	/** Moves to neighbor with the most worth
+	 *  worth = neighbor.gem / distance from current node to neighbor
+	 */
+	private void moveToBestNeighbor(RescuePhase state) {
+		Node current = state.currentNode();
+		Set<Node> neighborsSet = current.neighbors().keySet();
+		ArrayList<Node> neighbors = new ArrayList<Node>();
+		
+		for (Node n: neighborsSet) 
+			neighbors.add(n);
+		sortNeighbors(current, neighbors);
+		
+		int i = neighbors.size()-1;
+		int currentToNeighbor;
+		int neighborToEarth;
+		do {
+			currentToNeighbor = current.getEdge(neighbors.get(i)).length;
+			neighborToEarth = minPaths.get(neighbors.get(i)).distance();
+			i--;
+		} while (i > 0 && currentToNeighbor + neighborToEarth > state.fuelRemaining());
+		
+		state.moveTo(neighbors.get(i));
+
+	}
+	
+	private void sortNeighbors(Node current, ArrayList<Node> neighbors) {
+		//insertion sort
+		//inv: neighbors[0..i-1] is sorted in increasing order of worth
+		for (int i = 0; i < neighbors.size(); i++) {
+			//inv: neighbors[0..i] is sorted, except that the neighbors[k] might < neighbors[k-1]
+			int k = i;
+			while (k > 0 && worth(current, neighbors.get(k)) <= worth(current, neighbors.get(k-1))) {
+				if (worth(current, neighbors.get(k)) != worth(current, neighbors.get(k-1)) ||
+						neighbors.get(k).gems() < neighbors.get(k-1).gems()) { //tie-breaking condition
+					Node temp = neighbors.get(k);
+					neighbors.set(k, neighbors.get(k-1));
+					neighbors.set(k-1, temp);
+					k--;
+				}
+			}
+		}
+	}
+	
+	private double worth(Node current, Node neighbor) {
+		return (double) neighbor.gems()/current.getEdge(neighbor).fuelNeeded();
+	}
+	
 }

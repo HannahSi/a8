@@ -1,5 +1,6 @@
 package student;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -45,6 +46,33 @@ public class Paths {
         // no path from start to end
         return new LinkedList<Node>();
     }
+    
+    public static HashMap<Node, SF> allMinPaths(Node start) {
+	    	Heap<Node> F= new Heap<Node>(false);
+	
+	    	HashMap<Node, SF> data = new HashMap<Node, SF>();
+	    	F.add(start, 0);
+	    	data.put(start, new SF(null, 0));
+	
+	    	while (F.size() != 0) {
+	    		Node f = F.poll();
+	
+	    		for (Edge e : f.getExits()) {
+	    			Node w = e.getOther(f);
+	    			int distance = e.length + data.get(f).distance;
+	
+	    			if (!data.containsKey(w)) {
+	    				data.put(w, new SF(f, distance));
+	    				F.add(w, distance);
+	
+	    			} else if (distance < data.get(w).distance) {
+	    				data.put(w, new SF(f, distance));
+	    				F.updatePriority(w, distance);
+	    			}
+	    		}
+	    	} 
+	    	return data;
+    }
 
 
     /** Return the path from the start node to node end.
@@ -82,7 +110,7 @@ public class Paths {
     /** An instance contains information about a node: the previous node
      *  on a shortest path from the start node to this node and the distance
      *  of this node from the start node. */
-    private static class SF {
+    public static class SF {	//made private to public
         private Node backPtr; // backpointer on path from start node to this one
         private int distance; // distance from start node to this one
 
@@ -91,6 +119,11 @@ public class Paths {
         private SF(Node p, int d) {
             distance= d;     // Distance from start node to this one.
             backPtr= p;  // Backpointer on the path (null if start node)
+        }
+        
+        /** return the distance from the start node to this one */
+        public int distance() {
+        		return distance;
         }
 
         /** return a representation of this instance. */
