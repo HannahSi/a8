@@ -58,29 +58,23 @@ public class MySpaceship implements Spaceship {
 	@Override
 	public void search(SearchPhase state) {
 		// TODO: Find the missing spaceship
-		
 		int current = state.currentID();
 		visited.add(current);
-		
-		if (state.onPlanetX()) return;
-		
+				
 		List<NodeStatus> neighbors = Arrays.asList(state.neighbors());
 		Collections.sort(neighbors);
 		
 		for (int i = neighbors.size()-1; i >= 0; i--) {
 			
-			if (state.onPlanetX()) return;
+			if (state.onPlanetX()) return;	//base case
 			
+			//if neighbor node has not been visited yet
 			if (!visited.contains(neighbors.get(i).id())) {
-				
 				state.moveTo(neighbors.get(i).id());
-				
 				search(state);
-				
 				if (!state.onPlanetX())
 					state.moveTo(current);
 			}
-			
 		}
 	}
 	
