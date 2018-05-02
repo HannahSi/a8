@@ -250,7 +250,10 @@ public class Heap<E> {
         // TODO  8: When this method is correctly implemented, testing procedure
         //          test50updatePriority() won't find errors.
         Integer index= map.get(v);
-        if (index == null) throw new IllegalArgumentException("v is not in the priority queue");
+        if (index == null) {
+        		System.out.println(v);
+        		throw new IllegalArgumentException("v is not in the priority queue");
+        }
         double oldP= d[index].priority;
         d[index].priority= p;
         int t= compareTo(p, oldP);

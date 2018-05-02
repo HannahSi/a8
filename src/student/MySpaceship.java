@@ -4,11 +4,13 @@ package student;
  * 4/28: 1.5 hrs
  * separately 1 hr
  * 4/29 1 hr 
- * 4/30 1.75 hrs */
+ * 4/30 1.75 hrs 
+ * separately .75 hr
+ * 5/1 .5 hr at office hours
+ * separately 1.5 hr*/
 
 import controllers.Spaceship;
 
-import models.Edge;
 import models.Node;
 import models.NodeStatus;
 import student.Paths.SF;
@@ -21,14 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import org.omg.CORBA.Current;
-
 import controllers.RescuePhase;
 
 /** An instance implements the methods needed to complete the mission. */
 public class MySpaceship implements Spaceship {
 	
-	ArrayList<Integer> visited = new ArrayList<Integer>();
+	HashMap<Integer, Integer> visited = new HashMap<Integer, Integer>();
 	HashMap<Node, SF> minPaths = new HashMap<Node, SF>();
 
 	/** The spaceship is on the location given by parameter state.
@@ -58,23 +58,24 @@ public class MySpaceship implements Spaceship {
 	@Override
 	public void search(SearchPhase state) {
 		// TODO: Find the missing spaceship
+		if (state.onPlanetX()) return;	//base case
+		
 		int current = state.currentID();
-		visited.add(current);
+		visited.put(current, 0);
 				
 		List<NodeStatus> neighbors = Arrays.asList(state.neighbors());
-		Collections.sort(neighbors);
+		Collections.sort(neighbors); //sorted in order of increasing signal strength
 		
-		for (int i = neighbors.size()-1; i >= 0; i--) {
-			
-			if (state.onPlanetX()) return;	//base case
-			
+		int i = neighbors.size()-1;
+		while (i >= 0 && !state.onPlanetX()){
 			//if neighbor node has not been visited yet
-			if (!visited.contains(neighbors.get(i).id())) {
+			if (!visited.containsKey(neighbors.get(i).id())) {
 				state.moveTo(neighbors.get(i).id());
 				search(state);
 				if (!state.onPlanetX())
 					state.moveTo(current);
 			}
+			i--;
 		}
 	}
 	
@@ -99,6 +100,7 @@ public class MySpaceship implements Spaceship {
 		// TODO: Complete the rescue mission and collect gems
 		
 		minPaths = Paths.allMinPaths(state.earth());
+		moveToBestNeighbor(state);
 		
 	}
 	
@@ -107,12 +109,18 @@ public class MySpaceship implements Spaceship {
 	 */
 	private void moveToBestNeighbor(RescuePhase state) {
 		Node current = state.currentNode();
+		
 		Set<Node> neighborsSet = current.neighbors().keySet();
 		ArrayList<Node> neighbors = new ArrayList<Node>();
-		
 		for (Node n: neighborsSet) 
 			neighbors.add(n);
-		sortNeighbors(current, neighbors);
+		//sortNeighbors(current, neighbors);
+		
+		neighbors.sort((n1, n2) -> {
+			if (worth(current, n1) != worth(current, n2))
+				return (int) (worth(current, n1) - worth(current, n2));
+			return n1.gems() - n2.gems();
+		});
 		
 		int i = neighbors.size()-1;
 		int currentToNeighbor;
@@ -124,9 +132,7 @@ public class MySpaceship implements Spaceship {
 		} while (i > 0 && currentToNeighbor + neighborToEarth > state.fuelRemaining());
 		
 		state.moveTo(neighbors.get(i));
-		
-		
-
+		moveToBestNeighbor(state);
 	}
 	
 	private void sortNeighbors(Node current, ArrayList<Node> neighbors) {
