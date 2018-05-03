@@ -16,6 +16,41 @@ public class Paths {
      * Note: The empty list is NOT "null"; it is a list with 0 elements. */
     public static List<Node> minPath(Node start, Node end) {
         /* TODO Read Piazza note Assignment A7 for ALL details. */
+        Heap<Node> F= new Heap<Node>(true); // As in lecture slides
+
+        // data contains an entry for each node in S or F. Thus, |data| = |S| + |F|.
+        // For each such node, the value part in data contains the shortest known
+        // distance to the node and the node's backpointer on that shortest path.
+        HashMap<Node, SF> data= new HashMap<Node, SF>();
+
+        F.add(start, 0);
+        data.put(start, new SF(null, 0));
+        // inv: See Piazza note Assignment A7 (Spring 2018), 
+        //      together with def of F and data
+        while (F.size() != 0) {
+            Node f= F.poll();
+            if (f == end) return makePath(data, end);
+            int fDist= data.get(f).distance;
+            
+            for (Edge e : f.getExits()) {// for each neighbor w of f
+                Node w= e.getOther(f);
+                int newWdist= fDist + e.length;
+                SF wInfo= data.get(w);
+                if (wInfo == null) { //if w not in S or F
+                    data.put(w, new SF(f, newWdist));
+                    F.add(w, newWdist);
+                } else if (newWdist < wInfo.distance) {
+                    wInfo.distance= newWdist;
+                    wInfo.backPtr= f;
+                    F.updatePriority(w, newWdist);
+                }
+            }
+        }
+
+        // no path from start to end
+        return new LinkedList<Node>();
+        
+        /*
         Heap<Node> F= new Heap<Node>(false); // As in lecture slides
         
         HashMap<Node, SF> data = new HashMap<Node, SF>();
@@ -44,9 +79,41 @@ public class Paths {
         } 
         // no path from start to end
         return new LinkedList<Node>();
+        */
     }
     
     public static HashMap<Node, SF> allMinPaths(Node start) {
+    		Heap<Node> F= new Heap<Node>(true); // As in lecture slides
+    	
+        HashMap<Node, SF> data= new HashMap<Node, SF>();
+
+        F.add(start, 0);
+        data.put(start, new SF(null, 0));
+        // inv: See Piazza note Assignment A7 (Spring 2018), 
+        //      together with def of F and data
+        while (F.size() != 0) {
+            Node f= F.poll();
+            //if (f == end) return makePath(data, end);
+            int fDist= data.get(f).distance;
+            
+            for (Edge e : f.getExits()) {// for each neighbor w of f
+                Node w= e.getOther(f);
+                int newWdist= fDist + e.length;
+                SF wInfo= data.get(w);
+                if (wInfo == null) { //if w not in S or F
+                    data.put(w, new SF(f, newWdist));
+                    F.add(w, newWdist);
+                } else if (newWdist < wInfo.distance) {
+                    wInfo.distance= newWdist;
+                    wInfo.backPtr= f;
+                    F.updatePriority(w, newWdist);
+                }
+            }
+        }
+
+        // no path from start to end
+        return data;
+    		/*
 	    	Heap<Node> F= new Heap<Node>(false);
 	
 	    	HashMap<Node, SF> data = new HashMap<Node, SF>();
@@ -72,7 +139,7 @@ public class Paths {
 	    	} 
 	    	System.out.println(data);
 	    	return data;
-	    	
+	    	*/
     }
 
 

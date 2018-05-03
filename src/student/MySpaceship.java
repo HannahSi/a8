@@ -101,15 +101,15 @@ public class MySpaceship implements Spaceship {
 	public void rescue(RescuePhase state) {
 		// TODO: Complete the rescue mission and collect gems
 		
-		shortestPath = (LinkedList<Node>) Paths.minPath(state.currentNode(), state.earth());
-		int i = 1;
-		while(state.currentNode() != state.earth()) {
-			state.moveTo(shortestPath.get(i));
-			i++;
-		}
+//		shortestPath = (LinkedList<Node>) Paths.minPath(state.currentNode(), state.earth());
+//		int i = 1;
+//		while(state.currentNode() != state.earth()) {
+//			state.moveTo(shortestPath.get(i));
+//			i++;
+//		}
 		
-//		minPaths = Paths.allMinPaths(state.earth());
-//		moveToBestNeighbor(state);
+		minPaths = Paths.allMinPaths(state.earth());
+		moveToBestNeighbor(state);
 		
 	}
 	
