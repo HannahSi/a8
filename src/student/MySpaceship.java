@@ -109,6 +109,7 @@ public class MySpaceship implements Spaceship {
 //		}
 		
 		minPaths = Paths.allMinPaths(state.earth());
+		System.out.println(minPaths);
 		moveToBestNeighbor(state);
 		
 	}
@@ -117,30 +118,55 @@ public class MySpaceship implements Spaceship {
 	 *  worth = neighbor.gem / distance from current node to neighbor
 	 */
 	private void moveToBestNeighbor(RescuePhase state) {
+		
+		/* 1.base case */
+		if (state.currentNode() == state.earth()) return;
+		
 		Node current = state.currentNode();
 		
+		/*creates an ArrayList of neighboring nodes from current node */
 		Set<Node> neighborsSet = current.neighbors().keySet();
 		ArrayList<Node> neighbors = new ArrayList<Node>();
 		for (Node n: neighborsSet) 
 			neighbors.add(n);
 		//sortNeighbors(current, neighbors);
 		
+		/* 2.sorts neighbors based on worth: ratio of gems and edge distance */
 		neighbors.sort((n1, n2) -> {
 			if (worth(current, n1) != worth(current, n2))
 				return (int) (worth(current, n1) - worth(current, n2));
 			return n1.gems() - n2.gems();
 		});
+		System.out.println(neighbors);
 		
+		/* 3.iterate through the neighbors from most worth to least until a neighbor node is found 
+			where there is enough fuel to travel the distance to the node and then to Earth */
 		int i = neighbors.size()-1;
+		
+		int currentToNeighbor = current.getEdge(neighbors.get(i)).length;
+		int neighborToEarth = minPaths.get(neighbors.get(i)).distance();
+		
+		while(i > 0 && currentToNeighbor + neighborToEarth > state.fuelRemaining()) {
+			i--;
+			currentToNeighbor = current.getEdge(neighbors.get(i)).length;
+			neighborToEarth = minPaths.get(neighbors.get(i)).distance();
+		}
+		
+		/*
 		int currentToNeighbor;
 		int neighborToEarth;
+
 		do {
 			currentToNeighbor = current.getEdge(neighbors.get(i)).length;
 			neighborToEarth = minPaths.get(neighbors.get(i)).distance();
 			i--;
 		} while (i > 0 && currentToNeighbor + neighborToEarth > state.fuelRemaining());
+		*/
 		
+		
+		/* 4.move to the neighbor with highest worth that can reach to Earth with current fuel */
 		state.moveTo(neighbors.get(i));
+		/* 5.recursive step */
 		moveToBestNeighbor(state);
 	}
 	
