@@ -52,7 +52,7 @@ public class Paths {
 	    	HashMap<Node, SF> data = new HashMap<Node, SF>();
 	    	F.add(start, 0);
 	    	data.put(start, new SF(null, 0));
-	
+	    	
 	    	while (F.size() != 0) {
 	    		Node f = F.poll();
 	
@@ -70,7 +70,9 @@ public class Paths {
 	    			}
 	    		}
 	    	} 
+	    	System.out.println(data);
 	    	return data;
+	    	
     }
 
 

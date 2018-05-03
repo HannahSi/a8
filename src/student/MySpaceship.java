@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ public class MySpaceship implements Spaceship {
 	
 	HashMap<Integer, Integer> visited = new HashMap<Integer, Integer>();
 	HashMap<Node, SF> minPaths = new HashMap<Node, SF>();
+	LinkedList<Node> shortestPath = new LinkedList<Node>();
 
 	/** The spaceship is on the location given by parameter state.
 	 * Move the spaceship to Planet X and then return (with the spaceship is on
@@ -99,8 +101,15 @@ public class MySpaceship implements Spaceship {
 	public void rescue(RescuePhase state) {
 		// TODO: Complete the rescue mission and collect gems
 		
-		minPaths = Paths.allMinPaths(state.earth());
-		moveToBestNeighbor(state);
+		shortestPath = (LinkedList<Node>) Paths.minPath(state.currentNode(), state.earth());
+		int i = 1;
+		while(state.currentNode() != state.earth()) {
+			state.moveTo(shortestPath.get(i));
+			i++;
+		}
+		
+//		minPaths = Paths.allMinPaths(state.earth());
+//		moveToBestNeighbor(state);
 		
 	}
 	
