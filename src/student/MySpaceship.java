@@ -124,14 +124,14 @@ public class MySpaceship implements Spaceship {
 		
 		Node current = state.currentNode();
 		
-		/*creates an ArrayList of neighboring nodes from current node */
+		/* 2.creates an ArrayList of neighboring nodes from current node */
 		Set<Node> neighborsSet = current.neighbors().keySet();
 		ArrayList<Node> neighbors = new ArrayList<Node>();
 		for (Node n: neighborsSet) 
 			neighbors.add(n);
 		//sortNeighbors(current, neighbors);
 		
-		/* 2.sorts neighbors based on worth: ratio of gems and edge distance */
+		/* 3.sorts neighbors based on worth: ratio of gems and edge distance */
 		neighbors.sort((n1, n2) -> {
 			if (worth(current, n1) != worth(current, n2))
 				return (int) (worth(current, n1) - worth(current, n2));
@@ -139,7 +139,7 @@ public class MySpaceship implements Spaceship {
 		});
 		System.out.println(neighbors);
 		
-		/* 3.iterate through the neighbors from most worth to least until a neighbor node is found 
+		/* 4.iterate through the neighbors from most worth to least until a neighbor node is found 
 			where there is enough fuel to travel the distance to the node and then to Earth */
 		int i = neighbors.size()-1;
 		
@@ -164,9 +164,9 @@ public class MySpaceship implements Spaceship {
 		*/
 		
 		
-		/* 4.move to the neighbor with highest worth that can reach to Earth with current fuel */
+		/* 5.move to the neighbor with highest worth that can reach to Earth with current fuel */
 		state.moveTo(neighbors.get(i));
-		/* 5.recursive step */
+		/* 6.recursive step */
 		moveToBestNeighbor(state);
 	}
 	
