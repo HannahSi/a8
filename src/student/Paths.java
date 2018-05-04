@@ -193,6 +193,11 @@ public class Paths {
         public int distance() {
         		return distance;
         }
+        
+        /** return the backpointer from the start node to this one */
+        public Node backPtr() {
+        		return backPtr;
+        }
 
         /** return a representation of this instance. */
         public String toString() {
