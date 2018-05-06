@@ -112,13 +112,9 @@ public class MySpaceship implements Spaceship {
 //		}
 		
 		minPaths = Paths.allMinPaths(state.earth());
-<<<<<<< HEAD
-		moveToBestNeighbor(state);
-		
-=======
+
 		//moveToBestNeighborHeap(state);
 		moveToBestNeighborArray(state);
->>>>>>> ec4dd9772c07345b40b7830edb22af6a91adc10c
 	}
 	
 	/** Moves to neighbor with the most worth
@@ -164,7 +160,7 @@ public class MySpaceship implements Spaceship {
 	private void moveToBestNeighborArray(RescuePhase state) {
 		
 		/* 1.base case */
-		if (state.currentNode() == state.earth()) return;
+		//if (state.currentNode() == state.earth()) return;
 		
 		Node current = state.currentNode();
 		
@@ -175,45 +171,14 @@ public class MySpaceship implements Spaceship {
 			neighbors.add(n);
 		
 		/** new base case that doesn't fully work (test on seed 33)**/
-		//if (current == state.earth() && minDistance(neighbors, current) > state.fuelRemaining()) return;
+		if (current == state.earth() && 2*minDistance(neighbors, current) > state.fuelRemaining()) return;
 		
 		/* 3.sorts neighbors based on worth: ratio of gems and edge distance */
-<<<<<<< HEAD
-		neighbors.sort((n1, n2) -> {
-			if (worth(current, n1) != worth(current, n2))
-				return (int) (worth(current, n1) - worth(current, n2));
-			return n1.gems() - n2.gems();
-		});
+		neighbors.sort((n1, n2) -> compareWorth(current, n1, n2) ? -1:1);
 		System.out.println(neighbors);
 		for (Node n : neighbors) {
 			System.out.println(worth(current, n));
 		}
-		
-		/* 4.iterate through the neighbors from most worth to least until a neighbor node is found 
-			where there is enough fuel to travel the distance to the node and then to Earth */
-		int i = neighbors.size()-1;
-		int currentToNeighbor = current.getEdge(neighbors.get(i)).length;
-		int neighborToEarth = minPaths.get(neighbors.get(i)).distance();
-		
-		while(i > 0 && currentToNeighbor + neighborToEarth > state.fuelRemaining()) {
-			i--;
-			currentToNeighbor = current.getEdge(neighbors.get(i)).length;
-			neighborToEarth = minPaths.get(neighbors.get(i)).distance();
-		}
-		
-		/*
-		int currentToNeighbor;
-		int neighborToEarth;
-
-		do {
-			currentToNeighbor = current.getEdge(neighbors.get(i)).length;
-			neighborToEarth = minPaths.get(neighbors.get(i)).distance();
-			i--;
-		} while (i > 0 && currentToNeighbor + neighborToEarth > state.fuelRemaining());
-		*/
-		
-=======
-		sortNeighbors(current, neighbors);
 		
 		/* 4.iterate through the neighbors from most worth to least until a neighbor node is found 
 			where there is enough fuel to travel the distance to the node and then to Earth */
@@ -243,7 +208,6 @@ public class MySpaceship implements Spaceship {
 				n = neighbors.get(i);
 		//}
 		
->>>>>>> ec4dd9772c07345b40b7830edb22af6a91adc10c
 		/* 5.move to the neighbor with highest worth that can reach to Earth with current fuel */
 		state.moveTo(n);
 		
