@@ -109,7 +109,6 @@ public class MySpaceship implements Spaceship {
 //		}
 		
 		minPaths = Paths.allMinPaths(state.earth());
-		System.out.println(minPaths);
 		moveToBestNeighbor(state);
 		
 	}
@@ -138,11 +137,13 @@ public class MySpaceship implements Spaceship {
 			return n1.gems() - n2.gems();
 		});
 		System.out.println(neighbors);
+		for (Node n : neighbors) {
+			System.out.println(worth(current, n));
+		}
 		
 		/* 4.iterate through the neighbors from most worth to least until a neighbor node is found 
 			where there is enough fuel to travel the distance to the node and then to Earth */
 		int i = neighbors.size()-1;
-		
 		int currentToNeighbor = current.getEdge(neighbors.get(i)).length;
 		int neighborToEarth = minPaths.get(neighbors.get(i)).distance();
 		
@@ -162,7 +163,6 @@ public class MySpaceship implements Spaceship {
 			i--;
 		} while (i > 0 && currentToNeighbor + neighborToEarth > state.fuelRemaining());
 		*/
-		
 		
 		/* 5.move to the neighbor with highest worth that can reach to Earth with current fuel */
 		state.moveTo(neighbors.get(i));
