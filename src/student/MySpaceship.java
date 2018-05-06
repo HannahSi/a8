@@ -130,25 +130,24 @@ public class MySpaceship implements Spaceship {
 		/* 2.creates a max heap of neighboring nodes from current node, will be ordered by worth */
 		Set<Node> neighborsSet = current.neighbors().keySet();
 		Heap<Node> neighbors = new Heap<Node>(false);
-		for (Node n: neighborsSet) 
-			neighbors.add(n, worth(current,n) + n.gems()/5000.0);
-
+		for (Node n: neighborsSet) {
+			int currentToNeighbor = current.getEdge(n).length;
+			int neighborToEarth = minPaths.get(n).distance();
+			if (currentToNeighbor + neighborToEarth < state.fuelRemaining())
+				neighbors.add(n, worth(current,n) + n.gems()/5000.0);
+		}
 		/* 3.poll the neighbors until a neighbor node is found where there is enough fuel to travel the
 			 distance to the node and then to Earth */
 		Node n;
-//		if (neighbors.peek().gems() == 0)
-//			n = minPaths.get(current).backPtr();
-//		else {
-			int currentToNeighbor;
-			int neighborToEarth;
-			do {
-				n = neighbors.poll();
-				currentToNeighbor = current.getEdge(n).length;
-				neighborToEarth = minPaths.get(n).distance();
-			} while (currentToNeighbor + neighborToEarth > state.fuelRemaining());
-			
-			if (n.gems() == 0) n = minPaths.get(current).backPtr();
-		//}
+		int currentToNeighbor;
+		int neighborToEarth;
+		do {
+			n = neighbors.poll();
+			currentToNeighbor = current.getEdge(n).length;
+			neighborToEarth = minPaths.get(n).distance();
+		} while (currentToNeighbor + neighborToEarth > state.fuelRemaining());
+		
+		if (n.gems() == 0) n = minPaths.get(current).backPtr();
 		
 		/* 4.move to the neighbor with highest worth that can reach to Earth with current fuel */
 		state.moveTo(n);
@@ -160,53 +159,36 @@ public class MySpaceship implements Spaceship {
 	private void moveToBestNeighborArray(RescuePhase state) {
 		
 		/* 1.base case */
-		//if (state.currentNode() == state.earth()) return;
+		if (state.currentNode() == state.earth()) return;
 		
 		Node current = state.currentNode();
 		
 		/* 2.creates an ArrayList of neighboring nodes from current node */
 		Set<Node> neighborsSet = current.neighbors().keySet();
 		ArrayList<Node> neighbors = new ArrayList<Node>();
-		for (Node n: neighborsSet) 
-			neighbors.add(n);
+		for (Node n: neighborsSet) {
+			int currentToNeighbor = current.getEdge(n).length;
+			int neighborToEarth = minPaths.get(n).distance();
+			if (currentToNeighbor + neighborToEarth < state.fuelRemaining())
+				neighbors.add(n);
+		}
 		
 		/** new base case that doesn't fully work (test on seed 33)**/
-		if (current == state.earth() && 2*minDistance(neighbors, current) > state.fuelRemaining()) return;
+		//if (current == state.earth() && 2*minDistance(neighbors, current) > state.fuelRemaining()) return;
 		
 		/* 3.sorts neighbors based on worth: ratio of gems and edge distance */
 		neighbors.sort((n1, n2) -> compareWorth(current, n1, n2) ? -1:1);
-		System.out.println(neighbors);
-		for (Node n : neighbors) {
-			System.out.println(worth(current, n));
-		}
 		
 		/* 4.iterate through the neighbors from most worth to least until a neighbor node is found 
 			where there is enough fuel to travel the distance to the node and then to Earth */
-		int i = neighbors.size();
 		Node n;
+		int i = neighbors.size()-1;
 		
-//		if (neighbors.get(i-1).gems() == 0) {
-//			n = minPaths.get(current).backPtr();
-//		}
-//		else {
-			int currentToNeighbor;
-			int neighborToEarth;
-			do {
-				i--;
-				currentToNeighbor = current.getEdge(neighbors.get(i)).length;
-				neighborToEarth = minPaths.get(neighbors.get(i)).distance();
-			} while (currentToNeighbor + neighborToEarth > state.fuelRemaining());
-			
-			//This if statement replaces the one immediately above and gives the same score, though I
-			//feel like it should sometimes give something different. The first one resorts to the min path
-			//back to Earth if all the neighbors have 0 worth. The one below resorts to the min path in that
-			//case and also if the only planets with nonzero worth are too far (there wouldn't be enough fuel
-			//to return).
-			if (neighbors.get(i).gems() == 0) 
-				n = minPaths.get(current).backPtr();
-			else 
-				n = neighbors.get(i);
-		//}
+		if (neighbors.get(i).gems() == 0) 
+			n = neighbors.get((int) (Math.random()*neighbors.size()));
+			//n = minPaths.get(current).backPtr();
+		else 
+			n = neighbors.get(i);
 		
 		/* 5.move to the neighbor with highest worth that can reach to Earth with current fuel */
 		state.moveTo(n);
@@ -230,13 +212,6 @@ public class MySpaceship implements Spaceship {
 			}
 		}
 	}
-	
-//	Alternative to sorting that didn't work b/c .sort() needs lambda with int output
-//	neighbors.sort((n1, n2) -> {
-//		if (worth(current, n1) != worth(current, n2))
-//			return (int) (worth(current, n1) - worth(current, n2));
-//		return n1.gems() - n2.gems();
-//	});
 	
 	public boolean compareWorth(Node current, Node n1, Node n2){
 		//max gems is 5000
