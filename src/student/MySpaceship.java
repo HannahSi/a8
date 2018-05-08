@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -61,9 +60,10 @@ public class MySpaceship implements Spaceship {
 	}
 	
 	/**Modeled after depth-first walk of a graph and its specifications from the JavaHyperText
-	 * Major differences: chooses the neighbor with the strongest signal strength in additional to 
-	 * it is unvisited, and the method stops once the "walker" is on planet X
-	 * Precondition: planet/Node the "walker" is standing on (id is current) is unvisited
+	 * Major difference: visit neighbors in order of strongest to lowest signal strength until planet X is
+	 * reached
+	 * Precondition: state.currentID() corresponds to Node that is not contained in the HashMap visited
+	 * (the spaceship is visiting an unvisited planet)
 	 */
 	public void dfsWalkSearch(SearchPhase state) {
 		if (state.onPlanetX()) return;	//base case
@@ -110,20 +110,23 @@ public class MySpaceship implements Spaceship {
 		moveToBestNeighbor(state);
 	}
 	
-	/** The ship moves to neighbor with highest gems to edge distance ratio that the ship can reach 
-	 * with enough fuel to go back to Earth using the minimum path distance. 
-	 * If there are more than one "plausible" neighboring planet (enough fuel to go to planet and 
+	/** The spaceship moves to neighbor with highest gems-to-fuel needed ratio that the ship can reach 
+	 * with enough fuel to go back to Earth (calculated using the minimum path distance). 
+	 * If there is more than one "plausible" neighboring planet (enough fuel to go to planet and 
 	 * then to Earth) but they all have zero gems, then choose to go to a random planet that's not Earth.
-	 * Stops once the ship is on Earth
+	 * Stops once the ship is on Earth.
+	 * Precondition: there is enough fuel to return to Earth from state.currentNode(), unless
+	 * state.currentNode() is earth.
 	 */
 	private void moveToBestNeighbor(RescuePhase state) {
-		/* 1.base case */
+		/* 1. Base case */
 		if (state.currentNode() == state.earth()) return;
 		
 		Node current = state.currentNode();
-		
-		/* 2.creates an ArrayList of neighboring nodes from current node */
 		Set<Node> neighborsSet = current.neighbors().keySet();
+		
+		/* 2. Create an ArrayList of neighbors from which the spaceship has enough fuel to return
+		 * to earth if it travels to those neighbors (determined for each neighbor) */
 		ArrayList<Node> neighbors = new ArrayList<Node>();
 		for (Node n: neighborsSet) {
 			int currentToNeighbor = current.getEdge(n).length;
@@ -132,11 +135,12 @@ public class MySpaceship implements Spaceship {
 				neighbors.add(n);
 		}
 		
-		/* 3.sorts neighbors based on worth: ratio of gems and edge distance */
+		/* 3. Sort neighbors by increasing worth (ratio of gems and fuel needed). Tie-breaker is number of gems.*/
 		neighbors.sort((n1, n2) -> compareWorth(current, n1, n2) ? -1:1);
 		
-		/* 4.iterate through the neighbors from most worth to least until a neighbor node is found 
-			where there is enough fuel to travel the distance to the node and then to Earth */
+		/* 4. If the neighbor of highest worth (the last neighbor in the list) has 0 gems and there
+		 * is more than one neighbor the spaceship can move to, choose and move to a random neighbor that is 
+		 * not Earth. In any other case, choose and move to the last neighbor in the list.*/
 		Node n;
 		int i = neighbors.size()-1;
 		
@@ -148,24 +152,22 @@ public class MySpaceship implements Spaceship {
 		} else 
 			n = neighbors.get(i);
 		
-		/* 5.move to the neighbor with highest worth that can reach to Earth with current fuel */
 		state.moveTo(n);
 		
-		/* 6.recursive step */
+		/* 5. Recursive step */
 		moveToBestNeighbor(state);
 	}
 	
-	/**
-	 * 
-	 */
+	/** Return true if Node n1 is less than or equal to Node n2 in its worth and false otherwise. Worth is 
+	 * determined by the gem-to-fuel needed ratio, plus, as a tie breaker, the number of gems of the node
+	 * divided by the max number of gems (a constant in the PlanetX class). 
+	 * Precondition: n1 and n2 are neighbors of current. */
 	public boolean compareWorth(Node current, Node n1, Node n2){
-		//max gems is 5000
 		return (worth(current, n1) + n1.gems()/5000.0) <= (worth(current, n2) + n2.gems()/5000.0);
 	}
 	
-	/**
-	 * 
-	 */
+	/** The ratio of the gems on a neighbor to the fuel needed to reach the neighbor from the current planet
+	 *  Precondition: neighbor is a neighbor of current. */
 	private double worth(Node current, Node neighbor) {
 		return (double) neighbor.gems()/current.getEdge(neighbor).fuelNeeded();
 	}
