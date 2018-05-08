@@ -35,6 +35,7 @@ public class MySpaceship implements Spaceship {
 	HashMap<Integer, Integer> visited = new HashMap<Integer, Integer>();
 	HashMap<Node, SF> minPaths = new HashMap<Node, SF>();
 	LinkedList<Node> shortestPath = new LinkedList<Node>();
+	long startTime;
 
 	/** The spaceship is on the location given by parameter state.
 	 * Move the spaceship to Planet X and then return (with the spaceship is on
@@ -111,10 +112,11 @@ public class MySpaceship implements Spaceship {
 //			i++;
 //		}
 		
+		//startTime= System.nanoTime(); // start time of rescue phase
 		minPaths = Paths.allMinPaths(state.earth());
 
-		moveToBestNeighborHeap(state);
-		//moveToBestNeighborArray(state);
+		//moveToBestNeighborHeap(state);
+		moveToBestNeighborArray(state);
 	}
 	
 	/** Moves to neighbor with the most worth
@@ -177,10 +179,14 @@ public class MySpaceship implements Spaceship {
 		Node n;
 		int i = neighbors.size()-1;
 		
-		if (neighbors.get(i).gems() == 0) 
-			n = neighbors.get((int) (Math.random()*neighbors.size()));
+		if (neighbors.get(i).gems() == 0 && i > 0)  {
+			int randomIndex = (int) (Math.random()*neighbors.size());
+			while (neighbors.get(randomIndex) == state.earth())
+				randomIndex = (int) (Math.random()*neighbors.size());
+			
+			n = neighbors.get(randomIndex);
 			//n = minPaths.get(current).backPtr();
-		else 
+		} else 
 			n = neighbors.get(i);
 		
 		/* 5.move to the neighbor with highest worth that can reach to Earth with current fuel */
