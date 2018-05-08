@@ -22,10 +22,14 @@ import controllers.RescuePhase;
 /** An instance implements the methods needed to complete the mission. */
 public class MySpaceship implements Spaceship {
 	
+	// For search. HashMap of nodes that have already been visited in the dfsWalkSearch method
 	HashMap<Integer, Integer> visited = new HashMap<Integer, Integer>();
+	
+	/* For rescue. HashMap of nodes to SF objects to find distance of the minimum path from 
+	a node to Earth */
 	HashMap<Node, SF> minPaths = new HashMap<Node, SF>();
-	LinkedList<Node> shortestPath = new LinkedList<Node>();
-
+	
+	
 	/** The spaceship is on the location given by parameter state.
 	 * Move the spaceship to Planet X and then return (with the spaceship is on
 	 * Planet X). This completes the first phase of the mission.
@@ -56,8 +60,12 @@ public class MySpaceship implements Spaceship {
 		dfsWalkSearch(state);
 	}
 	
+	/**
+	 * 
+	 * @param state
+	 */
 	public void dfsWalkSearch(SearchPhase state) {
-if (state.onPlanetX()) return;	//base case
+		if (state.onPlanetX()) return;	//base case
 		
 		int current = state.currentID();
 		visited.put(current, 0);
@@ -98,10 +106,13 @@ if (state.onPlanetX()) return;	//base case
 	public void rescue(RescuePhase state) {
 		// TODO: Complete the rescue mission and collect gems
 		minPaths = Paths.allMinPaths(state.earth());
-		moveToBestNeighborArray(state);
+		moveToBestNeighbor(state);
 	}
 	
-	private void moveToBestNeighborArray(RescuePhase state) {
+	/**
+	 * 
+	 */
+	private void moveToBestNeighbor(RescuePhase state) {
 		/* 1.base case */
 		if (state.currentNode() == state.earth()) return;
 		
@@ -138,13 +149,20 @@ if (state.onPlanetX()) return;	//base case
 		state.moveTo(n);
 		
 		/* 6.recursive step */
-		moveToBestNeighborArray(state);
+		moveToBestNeighbor(state);
 	}
 	
+	/**
+	 * 
+	 */
 	public boolean compareWorth(Node current, Node n1, Node n2){
 		//max gems is 5000
 		return (worth(current, n1) + n1.gems()/5000.0) <= (worth(current, n2) + n2.gems()/5000.0);
 	}
+	
+	/**
+	 * 
+	 */
 	private double worth(Node current, Node neighbor) {
 		return (double) neighbor.gems()/current.getEdge(neighbor).fuelNeeded();
 	}
