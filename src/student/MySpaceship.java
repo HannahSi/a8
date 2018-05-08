@@ -113,8 +113,8 @@ public class MySpaceship implements Spaceship {
 		
 		minPaths = Paths.allMinPaths(state.earth());
 
-		moveToBestNeighborHeap(state);
-		//moveToBestNeighborArray(state);
+		//moveToBestNeighborHeap(state);
+		moveToBestNeighborArray(state);
 	}
 	
 	/** Moves to neighbor with the most worth
