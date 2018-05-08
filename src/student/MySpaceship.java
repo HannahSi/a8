@@ -60,9 +60,10 @@ public class MySpaceship implements Spaceship {
 		dfsWalkSearch(state);
 	}
 	
-	/**
-	 * 
-	 * @param state
+	/**Modeled after depth-first walk of a graph and its specifications from the JavaHyperText
+	 * Major differences: chooses the neighbor with the strongest signal strength in additional to 
+	 * it is unvisited, and the method stops once the "walker" is on planet X
+	 * Precondition: planet/Node the "walker" is standing on (id is current) is unvisited
 	 */
 	public void dfsWalkSearch(SearchPhase state) {
 		if (state.onPlanetX()) return;	//base case
@@ -109,8 +110,11 @@ public class MySpaceship implements Spaceship {
 		moveToBestNeighbor(state);
 	}
 	
-	/**
-	 * 
+	/** The ship moves to neighbor with highest gems to edge distance ratio that the ship can reach 
+	 * with enough fuel to go back to Earth using the minimum path distance. 
+	 * If there are more than one "plausible" neighboring planet (enough fuel to go to planet and 
+	 * then to Earth) but they all have zero gems, then choose to go to a random planet that's not Earth.
+	 * Stops once the ship is on Earth
 	 */
 	private void moveToBestNeighbor(RescuePhase state) {
 		/* 1.base case */
@@ -140,7 +144,6 @@ public class MySpaceship implements Spaceship {
 			int randomIndex = (int) (Math.random()*neighbors.size());
 			while (neighbors.get(randomIndex) == state.earth())
 				randomIndex = (int) (Math.random()*neighbors.size());
-			
 			n = neighbors.get(randomIndex);
 		} else 
 			n = neighbors.get(i);
