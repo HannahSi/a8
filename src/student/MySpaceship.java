@@ -148,4 +148,18 @@ if (state.onPlanetX()) return;	//base case
 	private double worth(Node current, Node neighbor) {
 		return (double) neighbor.gems()/current.getEdge(neighbor).fuelNeeded();
 	}
+<<<<<<< HEAD
+=======
+	
+	private int minDistance(List<Node> neighbors, Node current) {
+		int minDistance = current.getEdge(neighbors.get(0)).fuelNeeded();
+		for (Node n : neighbors) {
+			int distance = current.getEdge(n).fuelNeeded();
+			if (distance < minDistance)
+				minDistance = distance;
+		}	
+		return minDistance;
+	}
+	
+>>>>>>> bbca51c76c8df79b041d16d64e28cac846eb0b31
 }
