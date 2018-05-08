@@ -1,16 +1,6 @@
 package student;
 
-/** Time spent: 
- * 4/28: 1.5 hrs
- * separately 1 hr
- * 4/29 1 hr 
- * 4/30 1.75 hrs 
- * separately .75 hr
- * 5/1 .5 hr at office hours
- * separately 1.5 hr
- * 5/2 1.5 hrs
- * 5/3 2 hrs
- * */
+/**Names: Clara Song (cs2274), Hannah Si (hs649) */
 
 import controllers.Spaceship;
 
@@ -35,7 +25,6 @@ public class MySpaceship implements Spaceship {
 	HashMap<Integer, Integer> visited = new HashMap<Integer, Integer>();
 	HashMap<Node, SF> minPaths = new HashMap<Node, SF>();
 	LinkedList<Node> shortestPath = new LinkedList<Node>();
-	long startTime;
 
 	/** The spaceship is on the location given by parameter state.
 	 * Move the spaceship to Planet X and then return (with the spaceship is on
@@ -64,7 +53,11 @@ public class MySpaceship implements Spaceship {
 	@Override
 	public void search(SearchPhase state) {
 		// TODO: Find the missing spaceship
-		if (state.onPlanetX()) return;	//base case
+		dfsWalkSearch(state);
+	}
+	
+	public void dfsWalkSearch(SearchPhase state) {
+if (state.onPlanetX()) return;	//base case
 		
 		int current = state.currentID();
 		visited.put(current, 0);
@@ -77,7 +70,7 @@ public class MySpaceship implements Spaceship {
 			//if neighbor node has not been visited yet
 			if (!visited.containsKey(neighbors.get(i).id())) {
 				state.moveTo(neighbors.get(i).id());
-				search(state);
+				dfsWalkSearch(state);
 				if (!state.onPlanetX())
 					state.moveTo(current);
 			}
@@ -104,55 +97,11 @@ public class MySpaceship implements Spaceship {
 	@Override
 	public void rescue(RescuePhase state) {
 		// TODO: Complete the rescue mission and collect gems
-		
-//		shortestPath = (LinkedList<Node>) Paths.minPath(state.currentNode(), state.earth());
-//		int i = 1;
-//		while(state.currentNode() != state.earth()) {
-//			state.moveTo(shortestPath.get(i));
-//			i++;
-//		}
-		
-		//startTime= System.nanoTime(); // start time of rescue phase
 		minPaths = Paths.allMinPaths(state.earth());
-
-		//moveToBestNeighborHeap(state);
 		moveToBestNeighborArray(state);
 	}
 	
-	/** Moves to neighbor with the most worth
-	 *  worth = neighbor.gem / distance from current node to neighbor
-	 */
-	private void moveToBestNeighborHeap(RescuePhase state) {
-		
-		/* 1.base case */
-		if (state.currentNode() == state.earth()) return;
-		
-		Node current = state.currentNode();
-		
-		/* 2.creates a max heap of neighboring nodes from current node, will be ordered by worth */
-		Set<Node> neighborsSet = current.neighbors().keySet();
-		Heap<Node> neighbors = new Heap<Node>(false);
-		for (Node n: neighborsSet) {
-			int currentToNeighbor = current.getEdge(n).length;
-			int neighborToEarth = minPaths.get(n).distance();
-			if (currentToNeighbor + neighborToEarth < state.fuelRemaining())
-				neighbors.add(n, worth(current,n) + n.gems()/5000.0);
-		}
-		/* 3.poll the neighbors until a neighbor node is found where there is enough fuel to travel the
-			 distance to the node and then to Earth */
-		Node n = neighbors.poll();
-
-		if (n.gems() == 0) n = minPaths.get(current).backPtr();
-		
-		/* 4.move to the neighbor with highest worth that can reach to Earth with current fuel */
-		state.moveTo(n);
-		
-		/* 5.recursive step */
-		moveToBestNeighborHeap(state);
-	}
-	
 	private void moveToBestNeighborArray(RescuePhase state) {
-		
 		/* 1.base case */
 		if (state.currentNode() == state.earth()) return;
 		
@@ -168,9 +117,6 @@ public class MySpaceship implements Spaceship {
 				neighbors.add(n);
 		}
 		
-		/** new base case that doesn't fully work (test on seed 33)**/
-		//if (current == state.earth() && 2*minDistance(neighbors, current) > state.fuelRemaining()) return;
-		
 		/* 3.sorts neighbors based on worth: ratio of gems and edge distance */
 		neighbors.sort((n1, n2) -> compareWorth(current, n1, n2) ? -1:1);
 		
@@ -185,7 +131,6 @@ public class MySpaceship implements Spaceship {
 				randomIndex = (int) (Math.random()*neighbors.size());
 			
 			n = neighbors.get(randomIndex);
-			//n = minPaths.get(current).backPtr();
 		} else 
 			n = neighbors.get(i);
 		
@@ -196,22 +141,6 @@ public class MySpaceship implements Spaceship {
 		moveToBestNeighborArray(state);
 	}
 	
-	
-	private void sortNeighbors(Node current, ArrayList<Node> neighbors) {
-		//insertion sort
-		//inv: neighbors[0..i-1] is sorted in increasing order of worth
-		for (int i = 0; i < neighbors.size(); i++) {
-			//inv: neighbors[0..i] is sorted, except that the neighbors[k] might < neighbors[k-1]
-			int k = i;
-			while (k > 0 && compareWorth(current, neighbors.get(k), neighbors.get(k-1))) {
-				Node temp = neighbors.get(k);
-				neighbors.set(k, neighbors.get(k-1));
-				neighbors.set(k-1, temp);
-				k--;
-			}
-		}
-	}
-	
 	public boolean compareWorth(Node current, Node n1, Node n2){
 		//max gems is 5000
 		return (worth(current, n1) + n1.gems()/5000.0) <= (worth(current, n2) + n2.gems()/5000.0);
@@ -219,15 +148,4 @@ public class MySpaceship implements Spaceship {
 	private double worth(Node current, Node neighbor) {
 		return (double) neighbor.gems()/current.getEdge(neighbor).fuelNeeded();
 	}
-	
-	private int minDistance(List<Node> neighbors, Node current) {
-		int minDistance = current.getEdge(neighbors.get(0)).fuelNeeded();
-		for (Node n : neighbors) {
-			int distance = current.getEdge(n).fuelNeeded();
-			if (distance < minDistance)
-				minDistance = distance;
-		}	
-		return minDistance;
-	}
-	
 }
