@@ -49,10 +49,10 @@ public class Paths {
 
         // no path from start to end
         return new LinkedList<Node>();
-        
-
     }
     
+    /** Return a HashMap of all the Nodes and their SF's (the lengths of their shortest path to the start 
+     * node and their backpointers along those shortest paths*/
     public static HashMap<Node, SF> allMinPaths(Node start) {
     		Heap<Node> F= new Heap<Node>(true); // As in lecture slides
     	
@@ -84,33 +84,6 @@ public class Paths {
 
         // no path from start to end
         return data;
-    		/*
-	    	Heap<Node> F= new Heap<Node>(false);
-	
-	    	HashMap<Node, SF> data = new HashMap<Node, SF>();
-	    	F.add(start, 0);
-	    	data.put(start, new SF(null, 0));
-	    	
-	    	while (F.size() != 0) {
-	    		Node f = F.poll();
-	
-	    		for (Edge e : f.getExits()) {
-	    			Node w = e.getOther(f);
-	    			int distance = e.length + data.get(f).distance;
-	
-	    			if (!data.containsKey(w)) {
-	    				data.put(w, new SF(f, distance));
-	    				F.add(w, distance);
-	
-	    			} else if (distance < data.get(w).distance) {
-	    				data.put(w, new SF(f, distance));
-	    				F.updatePriority(w, distance);
-	    			}
-	    		}
-	    	} 
-	    	System.out.println(data);
-	    	return data;
-	    	*/
     }
 
 
